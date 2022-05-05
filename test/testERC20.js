@@ -48,16 +48,25 @@ describe("ERC20 SkyToken", function () {
 
 
       it("should let send token to another account", async function() {
-        await skyToken.transfer(acc1.address, 100);
-        expect(await skyToken.balanceOf(acc1.address)).to.equal(100)
+        const tx = await skyToken.transfer(acc1.address, 100);
+        expect(await skyToken.balanceOf(acc1.address)).to.equal(100);
+
+        await expect(tx).to.emit(skyToken, 'Transfer').withArgs(owner.address, acc1.address, 100)
       })
 
       it('should let you give another address the approval to send on your behalf', async function() {
         await skyToken.transfer(acc1.address, 100);
-        await skyToken.connect(acc1).approve(owner.address, 75);
-        await skyToken.transferFrom(acc1.address, acc2.address, 75);
+
+        const tx = await skyToken.connect(acc1).approve(owner.address, 75);
+        const tx2 = await skyToken.transferFrom(acc1.address, acc2.address, 75);
+
         expect(await skyToken.balanceOf(acc2.address)).to.eq(75);
+        
         await expect(skyToken.transferFrom(acc1.address, acc2.address, 5)).to.be.reverted;
+
+        await expect(tx).to.emit(skyToken, 'Approval').withArgs(acc1.address, owner.address, 75);
+
+        await expect(tx2).to.emit(skyToken, 'Transfer').withArgs(acc1.address, acc2.address, 75)
       })
 
       it('should be possible to buy token directly from smart contract', async function() {
@@ -70,7 +79,9 @@ describe("ERC20 SkyToken", function () {
         .to.be.revertedWith('Check the value')
 
         await expect(() => tx).
-          to.changeEtherBalance(skyToken, ethers.utils.parseEther("0.0002"))
+          to.changeEtherBalance(skyToken, ethers.utils.parseEther("0.0002"));
+        
+        await expect(tx).to.emit(skyToken, 'Transfer').withArgs(skyToken.address, acc1.address, tokenAmount)        
       })
 
       it('should only owner can withdraw from this contract', async function(){
