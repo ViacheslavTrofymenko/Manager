@@ -43,7 +43,7 @@ describe("ERC20 SkyToken", function () {
       })
 
       it('has 0 decimals', async function () {
-        expect(await this.token.decimals()).to.be.bignumber.equal('0');
+        expect(await skyToken.decimals()).to.equal(decimals);
       });
 
 
@@ -59,6 +59,31 @@ describe("ERC20 SkyToken", function () {
         expect(await skyToken.balanceOf(acc2.address)).to.eq(75);
         await expect(skyToken.transferFrom(acc1.address, acc2.address, 5)).to.be.reverted;
       })
-  
+
+      it('should be possible to buy token directly from smart contract', async function() {
+        const tokenAmount = 2;
+        const tx = await skyToken.connect(acc1).buyToken(tokenAmount, {value: ethers.utils.parseEther("0.0002")});
+
+        expect(await skyToken.balanceOf(acc1.address)).to.equal(2);
+
+        await expect(skyToken.connect(acc2).buyToken(tokenAmount, {value: ethers.utils.parseEther("0.0001")}))
+        .to.be.revertedWith('Check the value')
+
+        await expect(() => tx).
+          to.changeEtherBalance(skyToken, ethers.utils.parseEther("0.0002"))
+      })
+
+      it('should only owner can withdraw from this contract', async function(){
+        const tx = await skyToken.connect(acc1).buyToken(2, {value: ethers.utils.parseEther("0.0002")});
+        console.log(await skyToken.getBalance());
+        const tx2 = await skyToken.withdraw(owner.address);
+        console.log(await skyToken.getBalance());
+
+        const tx3 = await skyToken.connect(acc2).buyToken(2, {value: ethers.utils.parseEther("0.0002")});
+
+        await expect(skyToken.connect(acc1).withdraw(acc1.address))
+          .to.be.revertedWith("You are not the owner")        
+      })
+
     }) 
 })

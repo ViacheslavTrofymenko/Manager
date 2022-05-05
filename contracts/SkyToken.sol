@@ -137,7 +137,7 @@ contract SkyToken is ERC20Interface, SafeMath {
     function withdraw (address payable _to) external onlyOwner {
         _to.transfer(address(this).balance);
     }
-
+    /// @notice get Ethers balance of this smart contract
     function getBalance() public view returns (uint) {
     return address(this).balance;
     }
