@@ -22,9 +22,6 @@ contract SkyNftFactory is ERC721, Ownable {
 
     SkyNft[] public skyNfts;
 
-    mapping (uint => address) public skyTokenToOwner;
-    mapping (address => uint) public ownerSkytokenCount;   
-
     // solhint-disable-next-line
     constructor() ERC721("SkyNftoken", "SNFT") {}
     
@@ -56,25 +53,6 @@ contract SkyNftFactory is ERC721, Ownable {
         // solhint-disable-next-line
         uint32 date = uint32(block.timestamp);
 
-        /// @notice Update mapping which identify who is the owner of this(id) SkyToken.
-        skyTokenToOwner[tokenId] = to;
-
-        /// @notice Updates mappping of the number of tokens owned by the owner(address).
-        ownerSkytokenCount[to] = ownerSkytokenCount[to]++;
-
         skyNfts.push(SkyNft(tokenId, _rarity(), date, _baseURI()));
     }
-
-    /// @return The number of Skytokens owned by the owner
-    function getSkytokenByOwner(address _owner) external view returns(uint[] memory) {
-    uint[] memory result = new uint[](ownerSkytokenCount[_owner]);
-    uint counter = 0;
-    for (uint i = 0; i < skyNfts.length; i++) {
-      if (skyTokenToOwner[i] == _owner) {
-        result[counter] = i;
-        counter++;
-      }
-    }
-    return result;
-  }
 }
