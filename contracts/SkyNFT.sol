@@ -46,7 +46,12 @@ contract SkyNftFactory is ERC721, Ownable {
     }
 
     /// @dev Mint new NFT token with required NFT fields as per task #3.
-    function safeMint(address to) public virtual onlyOwner {
+
+    function safeMint(address _to) external onlyOwner {
+        _safeMint(_to);
+    }
+
+    function _safeMint(address to) internal virtual {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);

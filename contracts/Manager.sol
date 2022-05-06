@@ -20,7 +20,7 @@ contract Manager is SkyNftFactory {
     event TransferSent(address _from, address _to, uint _amount);
 
     /// @dev Represent who deposite tokens to this address
-    mapping(address => address ) internal _balanceOfDeposite;
+    mapping(address => address ) public balanceOfDeposite;
 
     constructor(address _tokenContract) {
         _transferOwnership(_msgSender());
@@ -42,16 +42,16 @@ contract Manager is SkyNftFactory {
         // solhint-disable-next-line
         tokenDepositeTime = block.timestamp;
 
-        _balanceOfDeposite[msg.sender] = address(this);
+        balanceOfDeposite[msg.sender] = address(this);
         emit TransferSent(msg.sender, address(this), _amountIn);
         return true;
     }
 
-    ///@notice Withdraw ERC20 tokens to the owner adress of Manager smart contract 
+    ///@notice Withdraw ERC20 tokens to the owner adress from Manager smart contract 
     function withdraw(address _to, uint _amountOut) public onlyOwner returns(bool success){
        
-        require(mintSkyNft(), "SkyNft is not created");
-        
+        // require(mintSkyNft(), "SkyNft is not created"); //How to do restriction
+        // that we can this function only after created NFT token????
 
         uint erc20balance = tokenSKY.balanceOf(address(this));
         
@@ -70,10 +70,10 @@ contract Manager is SkyNftFactory {
     function mintSkyNft() public returns(bool success) {
         // solhint-disable-next-line
         require(block.timestamp >= tokenDepositeTime + 1 minutes, "Nft is still locked");
-        require(_balanceOfDeposite[msg.sender] == address(this), "First send 2 SKY tokens");
-        SkyNftFactory.safeMint(msg.sender);
+        require(balanceOfDeposite[msg.sender] == address(this), "First send 2 SKY tokens");
+        SkyNftFactory._safeMint(msg.sender);
         return true;
-    }      
+    }     
 }
 
 
