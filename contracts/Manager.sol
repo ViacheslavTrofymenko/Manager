@@ -9,13 +9,12 @@ interface IERC20 {
     function transfer(address, uint) external returns (bool);
     function balanceOf(address account) external view returns (uint256);
     function transferFrom(address from, address to, uint256 amount) external returns (bool);
-    function approve(address spender, uint256 amount) external returns (bool);
+    function allowance(address tokenOwner, address spender) external returns (uint remaining); 
 }
 
 contract Manager is SkyNftFactory {
     uint256 public tokenDepositeTime;
-    address public tokenContract;
-    IERC20 public tokenSKY = IERC20(tokenContract);
+    IERC20 public tokenSKY;
 
 
     event TransferSent(address _from, address _to, uint _amount);
@@ -25,14 +24,19 @@ contract Manager is SkyNftFactory {
 
     constructor(address _tokenContract) {
         _transferOwnership(_msgSender());
-        tokenContract = _tokenContract;
+        tokenSKY = IERC20 (_tokenContract);
     }
 
     /// @notice Sending ERC20 tokens to the "Manager" smart contract
-    /// @notice 1 SkyNFT = 2 SKY tokens.
+    /// @notice 1 SkyNFT cost 2 SKY tokens.
+
     function depositTokens(uint _amountIn) public returns(bool success) {
         require(_amountIn <= tokenSKY.balanceOf(msg.sender), "Not enough tokens"); 
-        require(_amountIn == 2, "1 SkyNFT = 2 SKY tokens");     
+        require(_amountIn == 2, "1 SkyNFT = 2 SKY tokens");
+        
+        uint allowance = tokenSKY.allowance(msg.sender, address(this));
+        require(allowance >= _amountIn, "check allowance!");
+
         tokenSKY.transferFrom(msg.sender, address(this), _amountIn);
         
         // solhint-disable-next-line
@@ -59,7 +63,7 @@ contract Manager is SkyNftFactory {
     }
 
     ///@notice ERC20 tokens balance of Manager smart contracts
-    function balanceOfManager () public view returns (uint){
+    function balanceOfManager () public view returns(uint) {
         return tokenSKY.balanceOf(address(this));
     }
 
