@@ -8,8 +8,7 @@ let owner, acc1, acc2, acc3, acc4, skyNft;
     [owner, acc1, acc2, acc3, acc4] = await ethers.getSigners();
     const SkyNft = await ethers.getContractFactory("SkyNftFactory", owner);
     skyNft = await SkyNft.deploy();
-    await skyNft.deployed();
-   
+    await skyNft.deployed();   
   })
 
     it("should be succesfully deployed", async function() {
