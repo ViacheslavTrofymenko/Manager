@@ -32,6 +32,7 @@ contract SkyToken is ERC20Interface, SafeMath {
     uint8 public _decimals;
     uint public _totalSupply;
     uint public _ownerSupply;
+    uint public _contractSupply;
     uint public tokenPrice;
     address public owner;
 
@@ -49,13 +50,14 @@ contract SkyToken is ERC20Interface, SafeMath {
         _decimals = 0;
         tokenPrice = 0.0001 ether;
         _ownerSupply = 10000;
-        _totalSupply = _ownerSupply + 10000;
+        _contractSupply = 10000;
+        _totalSupply = _ownerSupply + _contractSupply;
         owner = msg.sender;
 
         balances[msg.sender] = _ownerSupply;
-        balances[address(this)] = _totalSupply;
+        balances[address(this)] = _contractSupply;
         emit Transfer(address(0), msg.sender, _ownerSupply);
-        emit Transfer(address(0), address(this), _totalSupply);
+        emit Transfer(address(0), address(this), _contractSupply);
     }
 
     modifier onlyOwner() {
